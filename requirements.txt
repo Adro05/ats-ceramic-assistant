@@ -1,0 +1,5 @@
+# Single source of truth for dependencies is pyproject.toml.
+# This installs the package in editable mode plus the dev extras (pytest, ruff).
+# NOTE: these are version ranges, not a lock. Generate a lockfile (e.g. pip-compile)
+# once the target plant environment is known.
+-e .[dev]

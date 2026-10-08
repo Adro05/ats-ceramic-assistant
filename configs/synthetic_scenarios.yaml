@@ -1,0 +1,157 @@
+# =============================================================================
+# SYNTHETIC DATA GENERATOR CONFIGURATION
+# -----------------------------------------------------------------------------
+# All data produced from this file is labeled data_origin = "synthetic".
+# Every number here is a SYNTHETIC MODELLING CHOICE. Nothing here describes the
+# client's printers, inks, glazes, kilns, instruments or tiles, and nothing here
+# is a measured or confirmed client fact.
+#
+# Scenario magnitudes are written in absolute dE00 / gloss units. Two scenarios are
+# deliberately anchored to the PLACEHOLDER tolerances in tolerances.yaml:
+#   * near_boundary assumes the placeholder dE00 threshold of 1.0
+#   * process_side_gloss_failure assumes the placeholder gloss threshold of 5.0
+# If those placeholders change, revisit those two scenario ranges.
+# =============================================================================
+schema_version: 1
+data_origin: synthetic
+
+generator:
+  seed: 7
+  n_skus: 6                       # SKUs that have calibration data
+  n_uncalibrated_skus: 2          # held-out SKUs used by the unseen_sku scenario
+  regions_per_sku: [3, 5]         # inclusive [min, max]; real region counts are a discovery item
+  contexts:
+    # Opaque synthetic identifiers. What constitutes a real "context" is a discovery item.
+    - context_id: ctx_syn_1
+      printer_id: PRN_SYN_A
+      glaze_context: GLAZE_SYN_1
+      ink_set_id: INKSET_SYN_1
+      data_origin: synthetic
+    - context_id: ctx_syn_2
+      printer_id: PRN_SYN_A
+      glaze_context: GLAZE_SYN_2
+      ink_set_id: INKSET_SYN_1
+      data_origin: synthetic
+    - context_id: ctx_syn_3
+      printer_id: PRN_SYN_B
+      glaze_context: GLAZE_SYN_1
+      ink_set_id: INKSET_SYN_2
+      data_origin: synthetic
+  # Context that receives only sparse calibration in the insufficient_calibration scenario.
+  sparse_calibration_context_id: ctx_syn_3
+
+  # Baseline measurement noise (1 sigma), scaled per scenario by measurement_noise_multiplier.
+  # SYNTHETIC values; they are not specifications of any real spectrophotometer.
+  measurement_noise:
+    L: 0.15
+    a: 0.10
+    b: 0.10
+    gloss: 0.5
+
+  # Random offset per kiln run applied to calibration experiments (1 sigma).
+  # SYNTHETIC ASSUMPTION: it exists so the calibration design must block by kiln run.
+  # Whether such run-to-run effects exist at the client, and how large they are, is a
+  # discovery question.
+  kiln_run_effect:
+    L: 0.20
+    a: 0.10
+    b: 0.10
+    gloss: 0.8
+
+  # Delta-L* contributed per unit of gloss shift: the "gloss contaminates measured
+  # lightness" trap. Synthetic coupling, not a physical claim.
+  gloss_to_L_coupling: 0.05
+
+  calibration_design:
+    n_kiln_runs: 3
+    replicates: 2
+    full_experiments_per_sku_context: 24
+    sparse_experiments_per_sku_context: 3
+
+# What the system SHOULD do for each scenario. Used only by the evaluation harness,
+# never as model input. "Correctable" / "unreachable" are defined relative to the
+# synthetic channel bounds in channels.yaml (placeholders), not to any real printer.
+scenarios:
+  correctable_color_shift:
+    description: "Colour deviation within the correctable range; gloss on target."
+    n_batches: 20
+    uncorrected_de00_range: [1.8, 4.0]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: reachable
+    sku_calibration: calibrated
+    calibration_density: full
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: recommend
+
+  near_boundary:
+    description: "Deviation close to the placeholder tolerance; correction benefit is marginal."
+    n_batches: 20
+    uncorrected_de00_range: [0.8, 1.4]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: reachable
+    sku_calibration: calibrated
+    calibration_density: full
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: recommend_with_caution
+
+  process_side_gloss_failure:
+    description: "Colour nearly acceptable but gloss far off; printer input should not be the lever."
+    n_batches: 20
+    uncorrected_de00_range: [0.4, 1.2]
+    gloss_shift_range: [8.0, 15.0]
+    shift_reachability: reachable
+    sku_calibration: calibrated
+    calibration_density: full
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: escalate
+
+  unreachable_color_shift:
+    description: "Deviation larger than any bounded correction can remove."
+    n_batches: 20
+    uncorrected_de00_range: [4.0, 8.0]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: unreachable
+    sku_calibration: calibrated
+    calibration_density: full
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: escalate
+
+  unseen_sku:
+    description: "SKU with no calibration data; the system must not extrapolate."
+    n_batches: 20
+    uncorrected_de00_range: [1.8, 4.0]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: reachable
+    sku_calibration: unseen
+    calibration_density: full
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: escalate
+
+  noisy_measurement:
+    description: "Elevated noise and frequent bad readings; the gate or confidence layer must object."
+    n_batches: 20
+    uncorrected_de00_range: [1.8, 4.0]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: reachable
+    sku_calibration: calibrated
+    calibration_density: full
+    measurement_noise_multiplier: 5.0
+    bad_measurement_probability: 0.25
+    expected_behavior: escalate
+
+  insufficient_calibration:
+    description: "Context with too little calibration data to trust the response model."
+    n_batches: 20
+    uncorrected_de00_range: [1.8, 4.0]
+    gloss_shift_range: [0.0, 1.0]
+    shift_reachability: reachable
+    sku_calibration: calibrated
+    calibration_density: sparse
+    measurement_noise_multiplier: 1.0
+    bad_measurement_probability: 0.02
+    expected_behavior: escalate

@@ -1,0 +1,42 @@
+# =============================================================================
+# ABSTRACT SYNTHETIC CHANNELS - NOT A REAL PRINTER
+# -----------------------------------------------------------------------------
+# Which printer inputs are controllable, their names, units and allowed ranges are
+# UNKNOWN (client discovery dependency). These four abstract channels, their unit and
+# their ranges are ASSUMPTIONS that exist only to exercise the pipeline. They do not
+# describe any client printer, RIP, ink set or colour model.
+#
+# Convention used by this prototype: a correction is expressed as a change (delta)
+# relative to the current state. "relative_gain_fraction" means a fractional change of
+# a channel's gain (0.05 = +5%); real units depend on the printer/RIP.
+# =============================================================================
+schema_version: 1
+data_origin: synthetic
+is_placeholder: true
+
+# PLACEHOLDER cap on the sum of absolute channel changes in one correction
+# (a stability constraint of the prototype, not a client rule).
+max_total_abs_delta: 0.25
+
+channels:
+  # Ranges below are PLACEHOLDERS. Zero (no change) must always be allowed.
+  - channel_id: ch_1
+    label: "Abstract synthetic channel 1"
+    unit: relative_gain_fraction
+    min_delta: -0.15
+    max_delta: 0.15
+  - channel_id: ch_2
+    label: "Abstract synthetic channel 2"
+    unit: relative_gain_fraction
+    min_delta: -0.15
+    max_delta: 0.15
+  - channel_id: ch_3
+    label: "Abstract synthetic channel 3"
+    unit: relative_gain_fraction
+    min_delta: -0.15
+    max_delta: 0.15
+  - channel_id: ch_4
+    label: "Abstract synthetic channel 4"
+    unit: relative_gain_fraction
+    min_delta: -0.15
+    max_delta: 0.15

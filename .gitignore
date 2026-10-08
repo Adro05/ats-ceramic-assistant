@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Secrets / local environment
+.env
+.env.*
+
+# Generated synthetic data is reproducible from a seed; keep only the placeholder.
+data/synthetic/*
+!data/synthetic/.gitkeep
+
+# Guard against accidentally committing real client data.
+data/client/
+data/private/
+
+# Runtime artifacts (audit logs, registries) created by later phases
+runtime/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

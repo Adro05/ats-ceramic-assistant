@@ -1,0 +1,60 @@
+# =============================================================================
+# PLACEHOLDER VALUES - NOT CLIENT VALUES
+# -----------------------------------------------------------------------------
+# Every number in this file exists only so the synthetic prototype can run.
+# Nothing here has been confirmed by the client. The client's real acceptance
+# tolerance, aggregation rule, gloss tolerance, gloss unit/angle and
+# measurement-noise limits are UNKNOWN (discovery dependencies) and must be
+# elicited / measured (tolerance elicitation exercise + gauge study) before any
+# real use.
+# =============================================================================
+schema_version: 1
+
+acceptance:
+  default:
+    # Which aggregate governs acceptance is a client decision: max_de00 | mean_de00.
+    # max_de00 is a PLACEHOLDER choice for the demo, not a client statement.
+    acceptance_metric: max_de00
+    delta_e00_threshold: 1.0      # PLACEHOLDER (dE00 units)
+    gloss_abs_threshold: 5.0      # PLACEHOLDER (unit and measurement angle UNKNOWN)
+    is_placeholder: true
+    source: "PLACEHOLDER for synthetic demo; client tolerance to be elicited"
+  # Per-SKU overrides. Empty until the client provides any. Two equivalent forms are
+  # accepted: a mapping {sku_id: <tolerance spec>} or a list of
+  # {sku_id: ..., tolerance: <tolerance spec>}. Either way it is stored immutably.
+  sku_overrides: {}
+
+measurement_quality:
+  # All thresholds below are PLACEHOLDERS. Real limits come from a gauge study.
+  is_placeholder: true
+  # Generic sanity bound on |a*| and |b*| to catch corrupt readings. CIELAB a*/b* are
+  # not strictly bounded; this is a plausibility check, not a client or instrument spec.
+  ab_abs_max: 128.0
+  # Plausibility upper bound for gloss. The gloss unit/angle are UNKNOWN (discovery
+  # dependency), so this number has no physical interpretation. null disables the check.
+  gloss_plausible_max: 200.0      # PLACEHOLDER
+  # Fewer replicates than this produces a warning, not a failure. PLACEHOLDER.
+  min_replicates_recommended: 3
+  # Replicate standard-deviation limits per quantity. PLACEHOLDERS, not instrument specs;
+  # to be replaced by gauge-study results.
+  replicate_std_warn:
+    L: 0.30
+    a: 0.30
+    b: 0.30
+    gloss: 1.0
+  replicate_std_fail:
+    L: 1.00
+    a: 1.00
+    b: 1.00
+    gloss: 3.0
+  # Policy when a batch measurement's metadata differs from the master's. This is OUR
+  # design default (any colorimetric mismatch blocks), not a client requirement. It is
+  # configurable per field. Which instrument/geometry/illuminant/observer/SCI-SCE
+  # configuration the client uses is a discovery dependency.
+  metadata_mismatch:
+    instrument_id: fail
+    geometry: fail
+    illuminant: fail
+    observer: fail
+    specular_mode: fail
+    aperture_mm: fail
