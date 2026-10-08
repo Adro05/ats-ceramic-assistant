@@ -3,3 +3,4 @@
 # NOTE: these are version ranges, not a lock. Generate a lockfile (e.g. pip-compile)
 # once the target plant environment is known.
 -e .[dev]
+scikit-learn>=1.9,<2.0
