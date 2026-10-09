@@ -5,10 +5,8 @@ from __future__ import annotations
 import streamlit as st
 
 from ats_ceramic.correction import QCDecision
-from ats_ceramic.schemas import DataOrigin
 from ats_ceramic.synthetic import SyntheticScenario
 from ats_ceramic.ui import (
-    DEMO_PROVENANCE,
     apply_human_qc,
     audit_rows,
     create_demo_bundle,
@@ -383,17 +381,25 @@ def _verification_page() -> None:
 
     # A deterministic synthetic verification measurement is intentionally derived from the
     # observed synthetic target, not from the hidden synthetic oracle or target_required_adjustment.
-    verified_regions = tuple(
-        region.model_copy(
-            update={
-                "L": region.L - 0.8 * (region.L - 50.0),
-                "a": region.a - 0.8 * (region.a - 8.0),
-                "b": region.b - 0.8 * (region.b - 4.0),
-                "gloss": region.gloss,
-            }
+    pipeline = st.session_state.pipeline
+
+    verified_regions = (
+        tuple(
+            region.model_copy(
+                update={
+                    "L": region.L - 0.8 * (region.L - 50.0),
+                    "a": region.a - 0.8 * (region.a - 8.0),
+                    "b": region.b - 0.8 * (region.b - 4.0),
+                    "gloss": region.gloss,
+                }
+            )
+            if region.region_id == target.region_id
+            else region
+            for region in pipeline.batch.regions
         )
-        for region in target.as_batch_measurement().regions
-    ) if not target.corrupted else ()
+        if not target.corrupted and pipeline.batch is not None
+        else ()
+        )
 
     if not verified_regions:
         st.warning(
@@ -420,14 +426,14 @@ def _verification_page() -> None:
                 acceptance_metric=AcceptanceMetric.MAX_DE00,
                 delta_e00_threshold=de_threshold,
                 gloss_abs_threshold=gloss_threshold,
-                data_origin=DataOrigin.SYNTHETIC,
-                provenance=DEMO_PROVENANCE,
+                data_origin=pipeline.batch.metadata.data_origin,
+                provenance=spec.provenance,
                 is_placeholder=True,
             )
             st.rerun()
         return
 
-    measurement = target.as_batch_measurement().model_copy(
+    measurement = pipeline.batch.model_copy(
         update={
             "iteration": 1,
             "applied_correction_id": spec.correction_spec_id,
